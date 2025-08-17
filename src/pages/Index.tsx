@@ -13,6 +13,92 @@ const Index = () => {
   const [isRolling, setIsRolling] = useState(false);
   const [prediction, setPrediction] = useState(4);
   const [activeSection, setActiveSection] = useState('home');
+  const [activeGame, setActiveGame] = useState('dice');
+  
+  // Mines game state
+  const [minesCount, setMinesCount] = useState(3);
+  const [minesField, setMinesField] = useState(Array(25).fill({ revealed: false, hasMine: false, hasGem: false }));
+  const [minesGameActive, setMinesGameActive] = useState(false);
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [minesMultiplier, setMinesMultiplier] = useState(1.0);
+  
+  // Battle game state
+  const [battlePlayers, setBattlePlayers] = useState([
+    { id: 1, name: 'Игрок 1', bet: 100, avatar: '🚀' },
+    { id: 2, name: 'Игрок 2', bet: 150, avatar: '🎯' },
+    { id: 3, name: 'Игрок 3', bet: 200, avatar: '⚡' }
+  ]);
+  const [battleResult, setBattleResult] = useState(null);
+  const [battleInProgress, setBattleInProgress] = useState(false);
+
+  // Mines game functions
+  const initMinesGame = () => {
+    const newField = Array(25).fill(null).map(() => ({ revealed: false, hasMine: false, hasGem: true }));
+    
+    // Place mines randomly
+    const minePositions = new Set();
+    while (minePositions.size < minesCount) {
+      minePositions.add(Math.floor(Math.random() * 25));
+    }
+    
+    minePositions.forEach(pos => {
+      newField[pos] = { revealed: false, hasMine: true, hasGem: false };
+    });
+    
+    setMinesField(newField);
+    setMinesGameActive(true);
+    setRevealedCount(0);
+    setMinesMultiplier(1.0);
+    setBalance(prev => prev - betAmount[0]);
+  };
+  
+  const revealCell = (index) => {
+    if (!minesGameActive || minesField[index].revealed) return;
+    
+    const newField = [...minesField];
+    newField[index] = { ...newField[index], revealed: true };
+    
+    if (newField[index].hasMine) {
+      // Game over - hit mine
+      setMinesField(newField);
+      setMinesGameActive(false);
+      alert('💣 Взрыв! Игра окончена!');
+    } else {
+      // Found gem
+      const newRevealedCount = revealedCount + 1;
+      const newMultiplier = 1 + (newRevealedCount * 0.3);
+      setRevealedCount(newRevealedCount);
+      setMinesMultiplier(newMultiplier);
+      setMinesField(newField);
+    }
+  };
+  
+  const cashOutMines = () => {
+    if (!minesGameActive) return;
+    const winAmount = betAmount[0] * minesMultiplier;
+    setBalance(prev => prev + winAmount);
+    setMinesGameActive(false);
+    alert(`💎 Вы забрали ${winAmount.toFixed(0)}₽!`);
+  };
+  
+  // Battle game functions
+  const startBattle = () => {
+    setBattleInProgress(true);
+    setBattleResult(null);
+    
+    setTimeout(() => {
+      const winner = battlePlayers[Math.floor(Math.random() * battlePlayers.length)];
+      setBattleResult(winner);
+      setBattleInProgress(false);
+      
+      if (winner.id === 1) { // Player 1 wins
+        const totalPot = battlePlayers.reduce((sum, player) => sum + player.bet, 0);
+        setBalance(prev => prev + totalPot - betAmount[0]);
+      } else {
+        setBalance(prev => prev - betAmount[0]);
+      }
+    }, 3000);
+  };
 
   const rollDice = () => {
     if (isRolling) return;
@@ -166,27 +252,52 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Games Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {games.map((game) => (
-            <Card 
-              key={game.id} 
-              className={`${game.gradient} border-0 text-white cursor-pointer transform transition-all duration-300 hover:scale-105 neon-glow hover:animate-glow-pulse`}
-            >
-              <CardContent className="p-6 text-center">
-                <div className="text-6xl mb-4">{game.emoji}</div>
-                <h3 className="text-2xl font-bold font-heading mb-2">{game.title}</h3>
-                <p className="text-white/80">{game.description}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Games Section - Show when games is active */}
+        {activeSection === 'games' && (
+          <div className="mb-8">
+            <div className="flex space-x-4 mb-6">
+              {games.map((game) => (
+                <Button
+                  key={game.id}
+                  onClick={() => setActiveGame(game.id)}
+                  variant={activeGame === game.id ? "default" : "outline"}
+                  className={`${activeGame === game.id ? 'neon-glow' : ''}`}
+                >
+                  {game.emoji} {game.title}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Games Section - Home view */}
+        {activeSection === 'home' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {games.map((game) => (
+              <Card 
+                key={game.id} 
+                onClick={() => {
+                  setActiveSection('games');
+                  setActiveGame(game.id);
+                }}
+                className={`${game.gradient} border-0 text-white cursor-pointer transform transition-all duration-300 hover:scale-105 neon-glow hover:animate-glow-pulse`}
+              >
+                <CardContent className="p-6 text-center">
+                  <div className="text-6xl mb-4">{game.emoji}</div>
+                  <h3 className="text-2xl font-bold font-heading mb-2">{game.title}</h3>
+                  <p className="text-white/80">{game.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-        {/* Dice Game Section */}
-        <Card className="bg-card border border-border neon-glow">
-          <CardHeader>
-            <CardTitle className="text-2xl font-heading neon-text">🎲 Игра в кости</CardTitle>
-          </CardHeader>
+        {/* Game Sections */}
+        {(activeSection === 'home' || (activeSection === 'games' && activeGame === 'dice')) && (
+          <Card className="bg-card border border-border neon-glow mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-heading neon-text">🎲 Игра в кости</CardTitle>
+            </CardHeader>
           <CardContent className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Game Controls */}
@@ -287,6 +398,205 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+        )}
+        
+        {/* Mines Game Section */}
+        {activeSection === 'games' && activeGame === 'mines' && (
+          <Card className="bg-card border border-border neon-glow mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-heading neon-text">💣 Mines</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Mines Controls */}
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Ставка</label>
+                    <Slider
+                      value={betAmount}
+                      onValueChange={setBetAmount}
+                      max={1000}
+                      min={10}
+                      step={10}
+                      className="w-full"
+                      disabled={minesGameActive}
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>10₽</span>
+                      <span className="text-neon-yellow font-bold">{betAmount[0]}₽</span>
+                      <span>1000₽</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Количество мин</label>
+                    <Slider
+                      value={[minesCount]}
+                      onValueChange={(value) => setMinesCount(value[0])}
+                      max={10}
+                      min={1}
+                      step={1}
+                      className="w-full"
+                      disabled={minesGameActive}
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>1</span>
+                      <span className="text-neon-pink font-bold">{minesCount}</span>
+                      <span>10</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted p-4 rounded-lg">
+                    <div className="flex justify-between items-center mb-2">
+                      <span>Ставка:</span>
+                      <span className="font-bold">{betAmount[0]}₽</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span>Найдено камней:</span>
+                      <span className="font-bold text-green-400">{revealedCount}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span>Множитель:</span>
+                      <span className="font-bold text-neon-cyan">{minesMultiplier.toFixed(2)}x</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Возможный выигрыш:</span>
+                      <span className="font-bold text-green-400">{(betAmount[0] * minesMultiplier).toFixed(0)}₽</span>
+                    </div>
+                  </div>
+
+                  {!minesGameActive ? (
+                    <Button 
+                      onClick={initMinesGame}
+                      className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 neon-glow"
+                    >
+                      Начать игру
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={cashOutMines}
+                      className="w-full h-12 text-lg font-bold bg-green-600 hover:bg-green-700 neon-glow"
+                      disabled={revealedCount === 0}
+                    >
+                      Забрать {(betAmount[0] * minesMultiplier).toFixed(0)}₽
+                    </Button>
+                  )}
+                </div>
+
+                {/* Mines Field */}
+                <div className="flex items-center justify-center">
+                  <div className="grid grid-cols-5 gap-2 p-4 bg-muted rounded-lg">
+                    {minesField.map((cell, index) => (
+                      <button
+                        key={index}
+                        onClick={() => revealCell(index)}
+                        disabled={!minesGameActive || cell.revealed}
+                        className={`w-12 h-12 rounded-lg border-2 transition-all duration-300 ${
+                          cell.revealed 
+                            ? cell.hasMine 
+                              ? 'bg-red-600 border-red-400 text-white' 
+                              : 'bg-green-600 border-green-400 text-white'
+                            : 'bg-card border-border hover:bg-primary/20 hover:border-primary neon-glow'
+                        }`}
+                      >
+                        {cell.revealed ? (cell.hasMine ? '💣' : '💎') : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Battle Game Section */}
+        {activeSection === 'games' && activeGame === 'battle' && (
+          <Card className="bg-card border border-border neon-glow mb-8">
+            <CardHeader>
+              <CardTitle className="text-2xl font-heading neon-text">⚔️ Battle</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Battle Controls */}
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Ваша ставка</label>
+                    <Slider
+                      value={betAmount}
+                      onValueChange={setBetAmount}
+                      max={1000}
+                      min={10}
+                      step={10}
+                      className="w-full"
+                      disabled={battleInProgress}
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>10₽</span>
+                      <span className="text-neon-yellow font-bold">{betAmount[0]}₽</span>
+                      <span>1000₽</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-muted p-4 rounded-lg">
+                    <h4 className="font-bold mb-3">Участники битвы:</h4>
+                    {battlePlayers.map((player) => (
+                      <div key={player.id} className="flex justify-between items-center mb-2">
+                        <span className="flex items-center space-x-2">
+                          <span className="text-xl">{player.avatar}</span>
+                          <span>{player.name}</span>
+                        </span>
+                        <span className="font-bold">{player.bet}₽</span>
+                      </div>
+                    ))}
+                    <div className="border-t border-border pt-2 mt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold">Общий банк:</span>
+                        <span className="font-bold text-green-400">
+                          {battlePlayers.reduce((sum, player) => sum + player.bet, 0)}₽
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={startBattle}
+                    disabled={battleInProgress}
+                    className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 neon-glow disabled:opacity-50"
+                  >
+                    {battleInProgress ? 'Битва идет...' : 'Начать битву!'}
+                  </Button>
+                </div>
+
+                {/* Battle Arena */}
+                <div className="flex items-center justify-center">
+                  <div className="bg-muted p-8 rounded-lg text-center min-h-[300px] flex flex-col justify-center">
+                    {battleInProgress ? (
+                      <div className="animate-pulse">
+                        <div className="text-6xl mb-4">⚔️</div>
+                        <p className="text-xl font-bold">Битва идет!</p>
+                        <p className="text-muted-foreground">Определяем победителя...</p>
+                      </div>
+                    ) : battleResult ? (
+                      <div className="animate-fade-in">
+                        <div className="text-6xl mb-4">{battleResult.avatar}</div>
+                        <p className="text-xl font-bold mb-2">Победитель: {battleResult.name}!</p>
+                        <Badge className="text-lg p-2">
+                          {battleResult.id === 1 ? 'Вы выиграли!' : 'Вы проиграли'}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-6xl mb-4">🏟️</div>
+                        <p className="text-xl font-bold mb-2">Арена готова!</p>
+                        <p className="text-muted-foreground">Нажмите "Начать битву" чтобы сразиться</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Footer */}
         <footer className="mt-16 py-8 border-t border-border">
