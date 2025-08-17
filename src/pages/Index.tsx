@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+import Header from '@/components/Header';
+import DiceGame from '@/components/DiceGame';
+import MinesGame from '@/components/MinesGame';
+import BattleGame from '@/components/BattleGame';
+import BonusesSection from '@/components/BonusesSection';
 
 const Index = () => {
   const [balance, setBalance] = useState(999999);
@@ -208,98 +211,69 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
-      {/* Header */}
-      <header className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="bg-primary w-10 h-10 rounded-lg flex items-center justify-center neon-glow">
-                <span className="text-xl font-bold font-heading">P</span>
-              </div>
-              <nav className="hidden md:flex space-x-6">
-                {navigation.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveSection(item.id)}
-                    className={`px-3 py-2 rounded-lg transition-all font-medium ${
-                      activeSection === item.id
-                        ? 'bg-primary text-primary-foreground neon-glow'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="bg-muted px-4 py-2 rounded-lg flex items-center space-x-2">
-                <Icon name="Wallet" size={20} />
-                <span className="font-bold text-neon-yellow">{balance.toLocaleString()}</span>
-              </div>
-              <Button className="neon-glow animate-glow-pulse">
-                Кошелек
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        navigation={navigation}
+        activeSection={activeSection}
+        balance={balance}
+        onSectionChange={setActiveSection}
+      />
 
       <main className="container mx-auto px-4 py-8">
-        {/* Bonus Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-primary to-purple-600 border-0 text-white neon-glow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold font-heading mb-2">
-                    Получите от 100₽ за простую регистрацию
-                  </h3>
-                  <p className="text-purple-100 mb-4">
-                    Не участвуйте в сомнительных розыгрышах, мы выдаем всего несколько призов за рандомные активности
-                  </p>
-                  <div className="mb-4">
-                    <span className="text-3xl font-bold">100₽</span>
+        {/* Bonus Cards - Show only on home */}
+        {activeSection === 'home' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card className="bg-gradient-to-br from-primary to-purple-600 border-0 text-white neon-glow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold font-heading mb-2">
+                      Получите от 100₽ за простую регистрацию
+                    </h3>
+                    <p className="text-purple-100 mb-4">
+                      Не участвуйте в сомнительных розыгрышах, мы выдаем всего несколько призов за рандомные активности
+                    </p>
+                    <div className="mb-4">
+                      <span className="text-3xl font-bold">100₽</span>
+                    </div>
+                    <Button variant="secondary" className="bg-white text-purple-600 hover:bg-purple-50">
+                      Получить бонус
+                    </Button>
                   </div>
-                  <Button variant="secondary" className="bg-white text-purple-600 hover:bg-purple-50">
-                    Получить бонус
-                  </Button>
-                </div>
-                <div className="hidden md:block">
-                  <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
-                    <Icon name="Coins" size={64} className="text-white" />
+                  <div className="hidden md:block">
+                    <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
+                      <Icon name="Coins" size={64} className="text-white" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="bg-gradient-to-br from-orange-500 to-yellow-500 border-0 text-white neon-glow">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-2xl font-bold font-heading mb-2">
-                    Бонус для новичков
-                  </h3>
-                  <p className="text-orange-100 mb-4">
-                    После регистрации получите 100$ до 500% на счет
-                  </p>
-                  <Button variant="secondary" className="bg-white text-orange-600 hover:bg-orange-50">
-                    Получить
-                  </Button>
-                </div>
-                <div className="hidden md:block">
-                  <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
-                    <Icon name="Gift" size={64} className="text-white" />
+            <Card className="bg-gradient-to-br from-orange-500 to-yellow-500 border-0 text-white neon-glow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-2xl font-bold font-heading mb-2">
+                      Бонус для новичков
+                    </h3>
+                    <p className="text-orange-100 mb-4">
+                      После регистрации получите 100$ до 500% на счет
+                    </p>
+                    <Button variant="secondary" className="bg-white text-orange-600 hover:bg-orange-50">
+                      Получить
+                    </Button>
+                  </div>
+                  <div className="hidden md:block">
+                    <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
+                      <Icon name="Gift" size={64} className="text-white" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-        {/* Games Section - Show when games is active */}
+        {/* Games Section Navigation */}
         {activeSection === 'games' && (
           <div className="mb-8">
             <div className="flex space-x-4 mb-6">
@@ -319,187 +293,13 @@ const Index = () => {
         
         {/* Bonuses Section */}
         {activeSection === 'bonuses' && (
-          <div className="space-y-6">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold font-heading neon-text mb-2">🎁 Бонусы</h2>
-              <p className="text-muted-foreground">Получайте бонусы за активность</p>
-            </div>
-            
-            {/* Daily Bonuses */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Registration Bonus */}
-              <Card className="bg-gradient-to-br from-green-500 to-emerald-600 border-0 text-white neon-glow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold font-heading mb-2">Бонус за регистрацию</h3>
-                      <p className="text-green-100 mb-4">Получите бонус просто за то, что зарегистрировались!</p>
-                      <div className="text-2xl font-bold mb-4">100₽</div>
-                      <Button 
-                        onClick={() => claimBonus('registration')}
-                        disabled={bonuses.registration.claimed}
-                        className="bg-white text-green-600 hover:bg-green-50 disabled:opacity-50"
-                      >
-                        {bonuses.registration.claimed ? '✅ Получено' : 'Получить бонус'}
-                      </Button>
-                    </div>
-                    <div className="text-6xl">🎯</div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* First Deposit Bonus */}
-              <Card className="bg-gradient-to-br from-blue-500 to-indigo-600 border-0 text-white neon-glow">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xl font-bold font-heading mb-2">Первый депозит</h3>
-                      <p className="text-blue-100 mb-4">Бонус к первому пополнению счета</p>
-                      <div className="text-2xl font-bold mb-4">50₽</div>
-                      <Button 
-                        onClick={() => claimBonus('firstDeposit')}
-                        disabled={bonuses.firstDeposit.claimed}
-                        className="bg-white text-blue-600 hover:bg-blue-50 disabled:opacity-50"
-                      >
-                        {bonuses.firstDeposit.claimed ? '✅ Получено' : 'Получить бонус'}
-                      </Button>
-                    </div>
-                    <div className="text-6xl">💰</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Social Media Bonuses */}
-            <Card className="bg-card border border-border neon-glow">
-              <CardHeader>
-                <CardTitle className="text-2xl font-heading neon-text">📱 Социальные сети</CardTitle>
-                <p className="text-muted-foreground">Привяжите аккаунты и получите бонусы</p>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Telegram */}
-                  <div className="bg-muted p-6 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-2xl">📱</div>
-                        <div>
-                          <h4 className="font-bold">Telegram</h4>
-                          <p className="text-sm text-muted-foreground">Привяжите Telegram аккаунт</p>
-                        </div>
-                      </div>
-                      <Badge variant={connectedAccounts.telegram ? "default" : "outline"}>
-                        {connectedAccounts.telegram ? 'Подключен' : 'Не подключен'}
-                      </Badge>
-                    </div>
-                    
-                    {connectedAccounts.telegram ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Icon name="Check" size={16} className="text-green-500" />
-                          <span className="text-sm">{connectedAccounts.telegram}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-500">Бонус: 20₽</span>
-                          <Badge variant={bonuses.telegram.claimed ? "default" : "destructive"}>
-                            {bonuses.telegram.claimed ? '✅ Получено' : '❌ Не получено'}
-                          </Badge>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">Получите 20₽ за привязку Telegram</p>
-                        <Button 
-                          onClick={connectTelegram}
-                          className="w-full bg-blue-500 hover:bg-blue-600 neon-glow"
-                        >
-                          <Icon name="MessageCircle" size={16} className="mr-2" />
-                          Подключить Telegram
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* VK */}
-                  <div className="bg-muted p-6 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-2xl text-white font-bold">VK</div>
-                        <div>
-                          <h4 className="font-bold">ВКонтакте</h4>
-                          <p className="text-sm text-muted-foreground">Привяжите VK аккаунт</p>
-                        </div>
-                      </div>
-                      <Badge variant={connectedAccounts.vk ? "default" : "outline"}>
-                        {connectedAccounts.vk ? 'Подключен' : 'Не подключен'}
-                      </Badge>
-                    </div>
-                    
-                    {connectedAccounts.vk ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Icon name="Check" size={16} className="text-green-500" />
-                          <span className="text-sm">{connectedAccounts.vk}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-green-500">Бонус: 20₽</span>
-                          <Badge variant={bonuses.vk.claimed ? "default" : "destructive"}>
-                            {bonuses.vk.claimed ? '✅ Получено' : '❌ Не получено'}
-                          </Badge>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-sm text-muted-foreground">Получите 20₽ за привязку ВКонтакте</p>
-                        <Button 
-                          onClick={connectVK}
-                          className="w-full bg-indigo-600 hover:bg-indigo-700 neon-glow"
-                        >
-                          <Icon name="Users" size={16} className="mr-2" />
-                          Подключить VK
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Bonus Summary */}
-            <Card className="bg-gradient-to-r from-primary to-secondary border-0 text-white neon-glow">
-              <CardContent className="p-6">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold font-heading mb-4">💎 Общий прогресс бонусов</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {Object.values(bonuses).filter(bonus => bonus.claimed).length}
-                      </div>
-                      <div className="text-sm">Получено</div>
-                    </div>
-                    <div className="bg-white/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {Object.values(bonuses).length - Object.values(bonuses).filter(bonus => bonus.claimed).length}
-                      </div>
-                      <div className="text-sm">Доступно</div>
-                    </div>
-                    <div className="bg-white/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {Object.values(bonuses).reduce((sum, bonus) => bonus.claimed ? sum + bonus.amount : sum, 0)}₽
-                      </div>
-                      <div className="text-sm">Заработано</div>
-                    </div>
-                    <div className="bg-white/20 p-4 rounded-lg">
-                      <div className="text-2xl font-bold">
-                        {Object.values(bonuses).reduce((sum, bonus) => !bonus.claimed ? sum + bonus.amount : sum, 0)}₽
-                      </div>
-                      <div className="text-sm">Потенциал</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <BonusesSection
+            bonuses={bonuses}
+            connectedAccounts={connectedAccounts}
+            onClaimBonus={claimBonus}
+            onConnectTelegram={connectTelegram}
+            onConnectVK={connectVK}
+          />
         )}
         
         {/* Games Section - Home view */}
@@ -524,310 +324,48 @@ const Index = () => {
           </div>
         )}
 
-        {/* Game Sections */}
+        {/* Dice Game */}
         {(activeSection === 'home' || (activeSection === 'games' && activeGame === 'dice')) && (
-          <Card className="bg-card border border-border neon-glow mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl font-heading neon-text">🎲 Игра в кости</CardTitle>
-            </CardHeader>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Game Controls */}
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Ставка</label>
-                  <Slider
-                    value={betAmount}
-                    onValueChange={setBetAmount}
-                    max={1000}
-                    min={10}
-                    step={10}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                    <span>10₽</span>
-                    <span className="text-neon-yellow font-bold">{betAmount[0]}₽</span>
-                    <span>1000₽</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Предсказание (больше или равно)</label>
-                  <Slider
-                    value={[prediction]}
-                    onValueChange={(value) => setPrediction(value[0])}
-                    max={6}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                    <span>1</span>
-                    <span className="text-neon-cyan font-bold">{prediction}</span>
-                    <span>6</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Множитель</label>
-                  <Slider
-                    value={multiplier}
-                    onValueChange={setMultiplier}
-                    max={6}
-                    min={1.1}
-                    step={0.1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                    <span>1.1x</span>
-                    <span className="text-neon-pink font-bold">{multiplier[0].toFixed(1)}x</span>
-                    <span>6.0x</span>
-                  </div>
-                </div>
-
-                <div className="bg-muted p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <span>Ставка:</span>
-                    <span className="font-bold">{betAmount[0]}₽</span>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span>Возможный выигрыш:</span>
-                    <span className="font-bold text-green-400">{(betAmount[0] * multiplier[0]).toFixed(0)}₽</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span>Шанс победы:</span>
-                    <span className="font-bold text-neon-cyan">{((7 - prediction) / 6 * 100).toFixed(1)}%</span>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={rollDice} 
-                  disabled={isRolling}
-                  className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 neon-glow disabled:opacity-50"
-                >
-                  {isRolling ? 'Бросаем...' : 'Бросить кости!'}
-                </Button>
-              </div>
-
-              {/* Dice Display */}
-              <div className="flex items-center justify-center">
-                <div className="relative">
-                  <div className={`w-32 h-32 bg-gradient-to-br from-neon-cyan to-blue-600 rounded-xl flex items-center justify-center text-6xl font-bold text-white neon-glow ${isRolling ? 'animate-dice-roll' : ''}`}>
-                    {diceResult}
-                  </div>
-                  {!isRolling && (
-                    <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
-                      <Badge 
-                        variant={diceResult >= prediction ? "default" : "destructive"}
-                        className="text-sm font-bold"
-                      >
-                        {diceResult >= prediction ? 'Победа!' : 'Проигрыш'}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          <DiceGame
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+            multiplier={multiplier}
+            setMultiplier={setMultiplier}
+            diceResult={diceResult}
+            isRolling={isRolling}
+            prediction={prediction}
+            setPrediction={setPrediction}
+            onRollDice={rollDice}
+          />
         )}
         
-        {/* Mines Game Section */}
+        {/* Mines Game */}
         {activeSection === 'games' && activeGame === 'mines' && (
-          <Card className="bg-card border border-border neon-glow mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl font-heading neon-text">💣 Mines</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Mines Controls */}
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Ставка</label>
-                    <Slider
-                      value={betAmount}
-                      onValueChange={setBetAmount}
-                      max={1000}
-                      min={10}
-                      step={10}
-                      className="w-full"
-                      disabled={minesGameActive}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>10₽</span>
-                      <span className="text-neon-yellow font-bold">{betAmount[0]}₽</span>
-                      <span>1000₽</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Количество мин</label>
-                    <Slider
-                      value={[minesCount]}
-                      onValueChange={(value) => setMinesCount(value[0])}
-                      max={10}
-                      min={1}
-                      step={1}
-                      className="w-full"
-                      disabled={minesGameActive}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>1</span>
-                      <span className="text-neon-pink font-bold">{minesCount}</span>
-                      <span>10</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <span>Ставка:</span>
-                      <span className="font-bold">{betAmount[0]}₽</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span>Найдено камней:</span>
-                      <span className="font-bold text-green-400">{revealedCount}</span>
-                    </div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span>Множитель:</span>
-                      <span className="font-bold text-neon-cyan">{minesMultiplier.toFixed(2)}x</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Возможный выигрыш:</span>
-                      <span className="font-bold text-green-400">{(betAmount[0] * minesMultiplier).toFixed(0)}₽</span>
-                    </div>
-                  </div>
-
-                  {!minesGameActive ? (
-                    <Button 
-                      onClick={initMinesGame}
-                      className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 neon-glow"
-                    >
-                      Начать игру
-                    </Button>
-                  ) : (
-                    <Button 
-                      onClick={cashOutMines}
-                      className="w-full h-12 text-lg font-bold bg-green-600 hover:bg-green-700 neon-glow"
-                      disabled={revealedCount === 0}
-                    >
-                      Забрать {(betAmount[0] * minesMultiplier).toFixed(0)}₽
-                    </Button>
-                  )}
-                </div>
-
-                {/* Mines Field */}
-                <div className="flex items-center justify-center">
-                  <div className="grid grid-cols-5 gap-2 p-4 bg-muted rounded-lg">
-                    {minesField.map((cell, index) => (
-                      <button
-                        key={index}
-                        onClick={() => revealCell(index)}
-                        disabled={!minesGameActive || cell.revealed}
-                        className={`w-12 h-12 rounded-lg border-2 transition-all duration-300 ${
-                          cell.revealed 
-                            ? cell.hasMine 
-                              ? 'bg-red-600 border-red-400 text-white' 
-                              : 'bg-green-600 border-green-400 text-white'
-                            : 'bg-card border-border hover:bg-primary/20 hover:border-primary neon-glow'
-                        }`}
-                      >
-                        {cell.revealed ? (cell.hasMine ? '💣' : '💎') : ''}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <MinesGame
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+            minesCount={minesCount}
+            setMinesCount={setMinesCount}
+            minesField={minesField}
+            minesGameActive={minesGameActive}
+            revealedCount={revealedCount}
+            minesMultiplier={minesMultiplier}
+            onInitMinesGame={initMinesGame}
+            onRevealCell={revealCell}
+            onCashOutMines={cashOutMines}
+          />
         )}
         
-        {/* Battle Game Section */}
+        {/* Battle Game */}
         {activeSection === 'games' && activeGame === 'battle' && (
-          <Card className="bg-card border border-border neon-glow mb-8">
-            <CardHeader>
-              <CardTitle className="text-2xl font-heading neon-text">⚔️ Battle</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Battle Controls */}
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Ваша ставка</label>
-                    <Slider
-                      value={betAmount}
-                      onValueChange={setBetAmount}
-                      max={1000}
-                      min={10}
-                      step={10}
-                      className="w-full"
-                      disabled={battleInProgress}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>10₽</span>
-                      <span className="text-neon-yellow font-bold">{betAmount[0]}₽</span>
-                      <span>1000₽</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-muted p-4 rounded-lg">
-                    <h4 className="font-bold mb-3">Участники битвы:</h4>
-                    {battlePlayers.map((player) => (
-                      <div key={player.id} className="flex justify-between items-center mb-2">
-                        <span className="flex items-center space-x-2">
-                          <span className="text-xl">{player.avatar}</span>
-                          <span>{player.name}</span>
-                        </span>
-                        <span className="font-bold">{player.bet}₽</span>
-                      </div>
-                    ))}
-                    <div className="border-t border-border pt-2 mt-3">
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold">Общий банк:</span>
-                        <span className="font-bold text-green-400">
-                          {battlePlayers.reduce((sum, player) => sum + player.bet, 0)}₽
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button 
-                    onClick={startBattle}
-                    disabled={battleInProgress}
-                    className="w-full h-12 text-lg font-bold bg-primary hover:bg-primary/90 neon-glow disabled:opacity-50"
-                  >
-                    {battleInProgress ? 'Битва идет...' : 'Начать битву!'}
-                  </Button>
-                </div>
-
-                {/* Battle Arena */}
-                <div className="flex items-center justify-center">
-                  <div className="bg-muted p-8 rounded-lg text-center min-h-[300px] flex flex-col justify-center">
-                    {battleInProgress ? (
-                      <div className="animate-pulse">
-                        <div className="text-6xl mb-4">⚔️</div>
-                        <p className="text-xl font-bold">Битва идет!</p>
-                        <p className="text-muted-foreground">Определяем победителя...</p>
-                      </div>
-                    ) : battleResult ? (
-                      <div className="animate-fade-in">
-                        <div className="text-6xl mb-4">{battleResult.avatar}</div>
-                        <p className="text-xl font-bold mb-2">Победитель: {battleResult.name}!</p>
-                        <Badge className="text-lg p-2">
-                          {battleResult.id === 1 ? 'Вы выиграли!' : 'Вы проиграли'}
-                        </Badge>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="text-6xl mb-4">🏟️</div>
-                        <p className="text-xl font-bold mb-2">Арена готова!</p>
-                        <p className="text-muted-foreground">Нажмите "Начать битву" чтобы сразиться</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <BattleGame
+            betAmount={betAmount}
+            setBetAmount={setBetAmount}
+            battlePlayers={battlePlayers}
+            battleResult={battleResult}
+            battleInProgress={battleInProgress}
+            onStartBattle={startBattle}
+          />
         )}
 
         {/* Footer */}
